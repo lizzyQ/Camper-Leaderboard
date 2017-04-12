@@ -1,0 +1,90 @@
+class CamperDetail extends React.Component {
+  render(){
+    return (
+          <tr>
+                <th scope="row">{this.props.order}</th>
+                 <td className="left-align">
+                      <div className="avatar">
+                        <img src={this.props.info.img}/>
+                      </div>
+                      {this.props.info.username}
+                </td>
+                <td>{this.props.info.recent}</td>
+                <td>{this.props.info.alltime}</td>
+          </tr>
+    );
+  }
+} 
+class Camperlist extends React.Component {
+  render(){
+   let camperInfos;
+   camperInfos = this.props.campers.map((val, index) =>{ 
+     return (<CamperDetail key={index} info={val} order={index+1} />);
+   });
+    return (
+             <tbody>
+                  {camperInfos}
+             </tbody>        
+    );
+  }
+}
+
+
+class Board extends React.Component {
+  constructor(){
+    super();
+    this.state = { 
+      campers:[],
+    };
+  }
+  
+  reOrderRecent(){
+   $('#rencentBtn').addClass('active');
+   $('#alltimeBtn').removeClass('active');
+   let urls = 'https://fcctop100.herokuapp.com/api/fccusers/top/recent'; 
+   this.getlist(urls); 
+  }
+  
+  reOrderAlltime(){
+    $('#rencentBtn').removeClass('active');
+    $('#alltimeBtn').addClass('active');
+    let urls = 'https://fcctop100.herokuapp.com/api/fccusers/top/alltime';
+    this.getlist(urls);
+  }
+  
+ getlist(urls){
+   $.ajax({
+       url: urls,
+       dataType:'json',
+       success: function(data){         
+          this.setState({ campers: data}); 
+       }.bind(this)
+    });
+ }
+  
+  componentDidMount(){
+    let urls = 'https://fcctop100.herokuapp.com/api/fccusers/top/recent';
+    this.getlist(urls);    
+  }
+ 
+  render(){
+    return (
+        <div> 
+           <h1>Leaderboard</h1>
+           <table className="table table-bordered">
+                <thead className="table-success">
+                  <tr>
+                    <th>#</th>
+                    <th>Camper Name</th>
+                    <th><button className="pntbtn" id="rencentBtn" onClick={this.reOrderRecent.bind(this)}>Points in past 30days</button></th>
+                    <th><button className="pntbtn" id="alltimeBtn" onClick={this.reOrderAlltime.bind(this)}>All time points</button></th>
+                  </tr>
+                </thead>
+                  <Camperlist campers={this.state.campers} />
+              </table>
+        </div>
+    );
+  }
+}
+
+ReactDOM.render(<Board />, document.getElementById('container'));
